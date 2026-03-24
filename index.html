@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flag Explorer 3D</title>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <style>
+    :root {
+      --bg-deep: #06213b;
+      --bg-mid: #134e6f;
+      --card: rgba(255, 255, 255, 0.93);
+      --text: #16324f;
+      --accent: #ef5b0c;
+      --accent-2: #119da4;
+      --ok: #2ea043;
+      --bad: #cc2936;
+      --ring: #ffd23f;
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+      --radius: 20px;
+      --font-display: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
+      --font-body: "Nunito", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 210, 63, 0.25), transparent 35%),
+        radial-gradient(circle at 84% 3%, rgba(17, 157, 164, 0.27), transparent 38%),
+        linear-gradient(140deg, var(--bg-deep), var(--bg-mid));
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      overflow: auto;
+    }
+
+    .game {
+      width: 100%;
+      max-width: 1400px;
+      min-height: calc(100dvh - 24px);
+      display: grid;
+      gap: 14px;
+    }
+
+    .header,
+    .panel,
+    .quiz,
+    .facts {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .header {
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.5rem);
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      font-size: clamp(1rem, 2.4vw, 1.1rem);
+      opacity: 0.88;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: end;
+      gap: 8px;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 7px 12px;
+      border: 2px solid #dcebf7;
+      background: #fff;
+      font-weight: 800;
+      font-size: 0.93rem;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(340px, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 14px;
+      display: flex;
+      min-width: 0;
+    }
+
+    .globe-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      width: 100%;
+      height: clamp(360px, 68vh, 760px);
+      border: 3px solid #d9edf6;
+      background: linear-gradient(180deg, #021e3d, #003566);
+      position: relative;
+    }
+
+    #globeViz {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .side-panel { display: grid; gap: 14px; align-content: start; min-width: 0; }
+
+    .map-hint {
+      position: absolute;
+      left: 12px;
+      bottom: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e8f6ff;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.28);
+      border-radius: 10px;
+      padding: 5px 9px;
+      pointer-events: none;
+    }
+
+    .quiz,
+    .facts {
+      padding: 18px;
+      border: 1px solid rgba(18, 61, 93, 0.14);
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 14px 26px rgba(5, 33, 58, 0.11);
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.2px;
+      color: #112f4a;
+    }
+
+    .panel-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.25px;
+      text-transform: uppercase;
+      color: #955102;
+      background: #fff3dc;
+      border: 1px solid #ffd998;
+    }
+
+    .prompt {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: #173750;
+      line-height: 1.35;
+      border-radius: 14px;
+      padding: 12px 13px;
+      background: linear-gradient(180deg, #f5fbff, #eaf8ff);
+      border: 1px solid #d4e8f4;
+    }
+
+    .btn-row {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid transparent;
+      cursor: pointer;
+      border-radius: 14px;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      padding: 11px 13px;
+      transition: transform 0.12s ease, filter 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 6px 14px rgba(13, 52, 79, 0.14);
+    }
+
+    button:active { transform: scale(0.98); }
+    button:hover {
+      filter: brightness(1.03);
+      box-shadow: 0 8px 18px rgba(13, 52, 79, 0.2);
+    }
+    button:focus-visible {
+      outline: 3px solid rgba(17, 157, 164, 0.45);
+      outline-offset: 1px;
+    }
+    .primary {
+      background: linear-gradient(180deg, #ff933f, var(--accent));
+      color: #fff;
+      border-color: rgba(195, 86, 18, 0.4);
+    }
+    .secondary {
+      background: linear-gradient(180deg, #17b7be, var(--accent-2));
+      color: #fff;
+      border-color: rgba(11, 102, 106, 0.4);
+    }
+    .ghost {
+      background: linear-gradient(180deg, #f7fdff, #ebf8fd);
+      color: #0a4f66;
+      border-color: #b8e5ea;
+    }
+
+    .options {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 9px;
+    }
+
+    .flag-card {
+      background: #ffffff;
+      border: 2px solid #d9e9f4;
+      border-radius: 12px;
+      min-height: 76px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      justify-items: start;
+      gap: 10px;
+      padding: 10px 12px;
+      box-shadow: none;
+      text-align: left;
+    }
+
+    .flag { font-size: 2.8rem; line-height: 1; }
+    .flag-label {
+      font-size: 0.92rem;
+      color: #2f4f6b;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .flag-card.good { border-color: var(--ok); animation: pop 260ms ease; }
+    .flag-card.bad { border-color: var(--bad); animation: shake 260ms ease 2; }
+    .flag-card:hover { transform: translateY(-1px); }
+
+    .fact-box {
+      border-radius: 15px;
+      border: 2px solid #d8e9f4;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #f3faff 100%);
+      padding: 12px;
+      min-height: 126px;
+      display: grid;
+      gap: 7px;
+      align-content: start;
+      box-shadow: inset 0 -10px 18px rgba(13, 74, 115, 0.05);
+    }
+
+    .country-title {
+      font-size: 1.08rem;
+      font-weight: 900;
+      color: #12324f;
+    }
+    .muted { opacity: 0.85; font-size: 0.95rem; }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .meta-pill {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #164a6b;
+      background: #e5f4ff;
+      border: 1px solid #c7e5f8;
+    }
+    .stamp-head {
+      margin-top: 2px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      color: #56738c;
+    }
+
+    .stamps {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+      gap: 8px;
+    }
+
+    .stamp {
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+      border: 2px solid #d7e8f4;
+      border-radius: 11px;
+      min-height: 62px;
+      padding: 7px 5px;
+      text-align: center;
+      opacity: 0.45;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .stamp.unlocked {
+      opacity: 1;
+      border-color: var(--ring);
+      background: #fff6cf;
+      transform: translateY(-1px);
+    }
+
+    .stamp-flag { font-size: 1.32rem; line-height: 1; }
+    .stamp-label { margin-top: 3px; font-size: 0.71rem; font-weight: 700; }
+
+    .fx {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 40;
+    }
+
+    .spark {
+      position: absolute;
+      width: 12px;
+      height: 16px;
+      border-radius: 2px;
+      animation: fall 950ms linear forwards;
+      top: -12px;
+    }
+
+    .pulse {
+      position: fixed;
+      left: 50%;
+      top: 45%;
+      transform: translate(-50%, -50%) scale(0.4);
+      width: 124px;
+      height: 124px;
+      border-radius: 999px;
+      border: 8px solid rgba(46, 160, 67, 0.78);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 41;
+    }
+
+    .pulse.show { animation: burst 700ms ease-out forwards; }
+
+    @keyframes pop {
+      0% { transform: scale(0.9); }
+      80% { transform: scale(1.07); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-2.4deg); }
+      75% { transform: rotate(2.4deg); }
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.95; }
+      100% { transform: translateY(72vh) rotate(320deg); opacity: 0; }
+    }
+
+    @keyframes burst {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+    }
+
+    @media (max-width: 930px) {
+      .layout { grid-template-columns: 1fr; }
+      .header { grid-template-columns: 1fr; }
+      .stats { justify-content: start; }
+      .globe-wrap, #globeViz { min-height: 320px; height: 320px; }
+      .panel-head { margin-bottom: 10px; }
+    }
+
+    @media (max-width: 560px) {
+      .options { grid-template-columns: 1fr; }
+      .globe-wrap, #globeViz { min-height: 290px; height: 290px; }
+      .quiz, .facts { padding: 14px; }
+      .flag-card { min-height: 72px; padding: 9px 11px; }
+      .flag { font-size: 2.5rem; }
+    }
+  </style>
+  <script src="https://unpkg.com/globe.gl"></script>
+</head>
+<body>
+  <main class="game">
+    <section class="header">
+      <div>
+        <h1>Flag Explorer 3D</h1>
+        <p class="subtitle">Spin the real world map, tap countries, and match flags in a game built for kids.</p>
+      </div>
+      <div class="stats">
+        <div class="chip">Score: <span id="score">0</span></div>
+        <div class="chip">Streak: <span id="streak">0</span></div>
+        <div class="chip">Passport Stamps: <span id="stampsCount">0</span></div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <section class="panel">
+        <div class="globe-wrap">
+          <div id="globeViz" aria-label="Interactive 3D world map"></div>
+          <div class="map-hint">Drag to rotate • Zoom with scroll/pinch • Tap countries to explore</div>
+        </div>
+      </section>
+
+      <section class="side-panel">
+        <section class="quiz">
+          <div class="panel-head">
+            <h2 class="panel-title">Start Quiz</h2>
+            <span class="panel-tag">Game Mode</span>
+          </div>
+          <p class="prompt" id="prompt">Press Start Quiz, then choose the correct flag.</p>
+          <div class="btn-row">
+            <button class="primary" id="startQuiz" type="button">Start Quiz</button>
+            <button class="secondary" id="replayHint" type="button">Repeat Hint</button>
+            <button class="ghost" id="worldTour" type="button">World Tour</button>
+          </div>
+          <div class="options" id="options"></div>
+        </section>
+
+        <section class="facts">
+          <div class="panel-head">
+            <h2 class="panel-title">Country Explorer</h2>
+            <span class="panel-tag">Discover</span>
+          </div>
+          <div class="fact-box" id="factBox">
+            <div class="country-title">Tap a country on the globe</div>
+            <div class="muted">You will see the country flag, capital city, and a fun fact.</div>
+          </div>
+          <div class="stamp-head">Passport Collection</div>
+          <div class="stamps" id="stamps"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <div class="fx" id="fx"></div>
+  <div class="pulse" id="pulse"></div>
+
+  <script>
+    const countries = [
+      { id: "us", name: "United States", flag: "🇺🇸", lat: 38, lng: -97, capital: "Washington, D.C.", fact: "The U.S. has 50 states.", color: "#ff6b6b" },
+      { id: "ca", name: "Canada", flag: "🇨🇦", lat: 56, lng: -106, capital: "Ottawa", fact: "Canada has the longest coastline in the world.", color: "#dc2626" },
+      { id: "mx", name: "Mexico", flag: "🇲🇽", lat: 23, lng: -102, capital: "Mexico City", fact: "Mexico City is one of the largest cities in the world.", color: "#10b981" },
+      { id: "br", name: "Brazil", flag: "🇧🇷", lat: -10, lng: -52, capital: "Brasilia", fact: "The Amazon rainforest is mostly in Brazil.", color: "#f4d35e" },
+      { id: "ar", name: "Argentina", flag: "🇦🇷", lat: -38, lng: -63, capital: "Buenos Aires", fact: "Argentina is known for tango dance.", color: "#60a5fa" },
+      { id: "gb", name: "United Kingdom", flag: "🇬🇧", lat: 55, lng: -3, capital: "London", fact: "Big Ben is one of the most famous landmarks in London.", color: "#00a6a6" },
+      { id: "fr", name: "France", flag: "🇫🇷", lat: 46, lng: 2, capital: "Paris", fact: "The Eiffel Tower is in Paris.", color: "#4d96ff" },
+      { id: "it", name: "Italy", flag: "🇮🇹", lat: 42.5, lng: 12.5, capital: "Rome", fact: "Rome has ancient landmarks like the Colosseum.", color: "#22c55e" },
+      { id: "eg", name: "Egypt", flag: "🇪🇬", lat: 26, lng: 30, capital: "Cairo", fact: "The Great Pyramids are in Egypt.", color: "#f97316" },
+      { id: "za", name: "South Africa", flag: "🇿🇦", lat: -30, lng: 25, capital: "Pretoria", fact: "South Africa has 3 capital cities.", color: "#22c55e" },
+      { id: "in", name: "India", flag: "🇮🇳", lat: 21, lng: 78, capital: "New Delhi", fact: "India is known for the Taj Mahal.", color: "#fb7185" },
+      { id: "cn", name: "China", flag: "🇨🇳", lat: 35, lng: 103, capital: "Beijing", fact: "The Great Wall of China is very long.", color: "#ef4444" },
+      { id: "jp", name: "Japan", flag: "🇯🇵", lat: 36, lng: 138, capital: "Tokyo", fact: "Japan is made of many islands.", color: "#f43f5e" },
+      { id: "kr", name: "South Korea", flag: "🇰🇷", lat: 36.5, lng: 127.8, capital: "Seoul", fact: "Korea is famous for technology and pop culture.", color: "#8b5cf6" },
+      { id: "au", name: "Australia", flag: "🇦🇺", lat: -25, lng: 133, capital: "Canberra", fact: "Australia is both a country and a continent.", color: "#3b82f6" },
+      { id: "nz", name: "New Zealand", flag: "🇳🇿", lat: -41, lng: 174, capital: "Wellington", fact: "New Zealand has two main islands.", color: "#06b6d4" }
+    ];
+
+    const stampRewards = [
+      { need: 1, icon: "🥉" },
+      { need: 3, icon: "🎒" },
+      { need: 5, icon: "🚀" },
+      { need: 7, icon: "🧭" },
+      { need: 9, icon: "🏆" },
+      { need: 12, icon: "🌟" }
+    ];
+
+    const scoreNode = document.getElementById("score");
+    const streakNode = document.getElementById("streak");
+    const stampsCountNode = document.getElementById("stampsCount");
+    const promptNode = document.getElementById("prompt");
+    const optionsNode = document.getElementById("options");
+    const factBox = document.getElementById("factBox");
+    const stampsNode = document.getElementById("stamps");
+    const startQuizBtn = document.getElementById("startQuiz");
+    const replayHintBtn = document.getElementById("replayHint");
+    const worldTourBtn = document.getElementById("worldTour");
+    const fx = document.getElementById("fx");
+    const pulse = document.getElementById("pulse");
+
+    let score = Number(localStorage.getItem("flagExplorerScore") || 0);
+    let streak = Number(localStorage.getItem("flagExplorerStreak") || 0);
+    const stamps = new Set(JSON.parse(localStorage.getItem("flagExplorerStamps") || "[]"));
+
+    let currentQuestion = null;
+    let questionActive = false;
+    let highlightedId = null;
+    let worldTourTimer = null;
+    const countryFeatureById = new Map();
+    const countryByFeatureName = new Map();
+    let polygonFeatures = [];
+
+    const globe = Globe()(document.getElementById("globeViz"))
+      .width(document.getElementById("globeViz").clientWidth)
+      .height(document.getElementById("globeViz").clientHeight)
+      .backgroundColor("rgba(0,0,0,0)")
+      .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
+      .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+      .showAtmosphere(true)
+      .atmosphereColor("#8ad8ff")
+      .atmosphereAltitude(0.17)
+      .polygonsData([])
+      .polygonAltitude((feature) => isHighlightedFeature(feature) ? 0.012 : 0.004)
+      .polygonCapColor((feature) => isHighlightedFeature(feature) ? "rgba(255, 210, 63, 0.9)" : "rgba(121, 198, 130, 0.55)")
+      .polygonSideColor((feature) => isHighlightedFeature(feature) ? "rgba(255, 185, 40, 0.3)" : "rgba(48, 117, 80, 0.12)")
+      .polygonStrokeColor((feature) => isHighlightedFeature(feature) ? "rgba(255, 255, 255, 1)" : "rgba(212, 242, 255, 0.58)")
+      .polygonLabel((feature) => `<b>${feature.properties?.name || "Country"}</b>`)
+      .onPolygonClick((feature) => {
+        const featureName = normalizeName(feature.properties?.name || "");
+        const country = countryByFeatureName.get(featureName);
+        if (country) {
+          focusCountry(country);
+          promptNode.textContent = `You discovered ${country.name}.`;
+          speak(`${country.name}. ${country.fact}`);
+        } else {
+          setHighlightedFeature(featureName);
+          promptNode.textContent = `You tapped ${feature.properties?.name || "a country"}.`;
+        }
+      })
+      .polygonsTransitionDuration(220)
+      .ringsData([])
+      .ringLat("lat")
+      .ringLng("lng")
+      .ringColor(() => ["#ffd23f", "#ffd23f", "#ffd23f", "rgba(255,210,63,0.2)"])
+      .ringMaxRadius(5)
+      .ringPropagationSpeed(1.7)
+      .ringRepeatPeriod(850);
+
+    globe.controls().autoRotate = true;
+    globe.controls().autoRotateSpeed = 0.55;
+    globe.pointOfView({ lat: 18, lng: 12, altitude: 2.1 }, 0);
+
+    const countryNameAliases = {
+      us: ["united states of america", "usa", "united states"],
+      gb: ["united kingdom", "uk", "great britain", "britain"],
+      kr: ["south korea", "korea republic of", "republic of korea"],
+      nz: ["new zealand"],
+      za: ["south africa"],
+      cn: ["china"],
+      in: ["india"],
+      au: ["australia"],
+      jp: ["japan"],
+      fr: ["france"],
+      it: ["italy"],
+      ca: ["canada"],
+      mx: ["mexico"],
+      br: ["brazil"],
+      ar: ["argentina"],
+      eg: ["egypt"]
+    };
+
+    function normalizeName(name) {
+      return String(name || "")
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9 ]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function isHighlightedFeature(feature) {
+      if (!highlightedId) {
+        return false;
+      }
+      const featureName = normalizeName(feature.properties?.name || "");
+      const highlightedFeatureName = countryFeatureById.get(highlightedId);
+      return !!highlightedFeatureName && featureName === highlightedFeatureName;
+    }
+
+    function setHighlightedFeature(featureName) {
+      if (!featureName) {
+        return;
+      }
+      globe.polygonCapColor((feature) => normalizeName(feature.properties?.name || "") === featureName ? "rgba(255, 210, 63, 0.9)" : "rgba(121, 198, 130, 0.55)");
+      globe.polygonSideColor((feature) => normalizeName(feature.properties?.name || "") === featureName ? "rgba(255, 185, 40, 0.3)" : "rgba(48, 117, 80, 0.12)");
+      globe.polygonStrokeColor((feature) => normalizeName(feature.properties?.name || "") === featureName ? "rgba(255,255,255,1)" : "rgba(212, 242, 255, 0.58)");
+      globe.polygonAltitude((feature) => normalizeName(feature.properties?.name || "") === featureName ? 0.012 : 0.004);
+      globe.polygonsData(polygonFeatures);
+    }
+
+    function getFeatureNamesForCountry(country) {
+      const aliases = countryNameAliases[country.id] || [];
+      return [country.name, ...aliases].map(normalizeName);
+    }
+
+    function mapCountriesToFeatures(features) {
+      const featureByName = new Map(
+        features
+          .map((feature) => [normalizeName(feature.properties?.name || ""), feature])
+          .filter(([name]) => !!name)
+      );
+
+      countries.forEach((country) => {
+        const names = getFeatureNamesForCountry(country);
+        const matchedName = names.find((name) => featureByName.has(name));
+        if (matchedName) {
+          countryFeatureById.set(country.id, matchedName);
+          countryByFeatureName.set(matchedName, country);
+        }
+      });
+    }
+
+    async function loadWorldPolygons() {
+      try {
+        const geo = await fetch("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then((res) => res.json());
+        polygonFeatures = geo.features || [];
+        mapCountriesToFeatures(polygonFeatures);
+        globe.polygonsData(polygonFeatures);
+      } catch (error) {
+        promptNode.textContent = "Country polygons could not load from the network.";
+      }
+    }
+
+    function resizeGlobe() {
+      const el = document.getElementById("globeViz");
+      globe.width(el.clientWidth).height(el.clientHeight);
+    }
+
+    function saveProgress() {
+      localStorage.setItem("flagExplorerScore", String(score));
+      localStorage.setItem("flagExplorerStreak", String(streak));
+      localStorage.setItem("flagExplorerStamps", JSON.stringify(Array.from(stamps)));
+    }
+
+    function updateStats() {
+      scoreNode.textContent = score;
+      streakNode.textContent = streak;
+      stampsCountNode.textContent = String(stamps.size);
+    }
+
+    function renderStamps() {
+      const nodes = stampRewards.map((reward) => {
+        const unlocked = score >= reward.need;
+        const card = document.createElement("div");
+        card.className = `stamp${unlocked ? " unlocked" : ""}`;
+        card.innerHTML = `<div class="stamp-flag">${reward.icon}</div><div class="stamp-label">${unlocked ? `${reward.need} pts` : `Unlock ${reward.need}`}</div>`;
+        return card;
+      });
+      stampsNode.replaceChildren(...nodes);
+    }
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.93;
+      utterance.pitch = 1.08;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function tone(freq, duration = 0.12, at = 0) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const audio = tone.ctx || (tone.ctx = new AudioContextClass());
+      if (audio.state === "suspended") audio.resume();
+
+      const now = audio.currentTime + at;
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.14, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc.connect(gain);
+      gain.connect(audio.destination);
+      osc.start(now);
+      osc.stop(now + duration + 0.02);
+    }
+
+    function celebrate() {
+      pulse.classList.remove("show");
+      void pulse.offsetWidth;
+      pulse.classList.add("show");
+
+      const colors = ["#ffd23f", "#ef476f", "#06d6a0", "#118ab2", "#ff7f11"];
+      fx.replaceChildren();
+      for (let i = 0; i < 24; i += 1) {
+        const spark = document.createElement("div");
+        spark.className = "spark";
+        spark.style.left = `${4 + i * 4}%`;
+        spark.style.background = colors[i % colors.length];
+        spark.style.animationDelay = `${(i % 6) * 35}ms`;
+        fx.appendChild(spark);
+      }
+      setTimeout(() => fx.replaceChildren(), 980);
+
+      tone(660, 0.13, 0);
+      tone(880, 0.14, 0.08);
+      tone(1175, 0.16, 0.16);
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function highlightCountry(country) {
+      highlightedId = country.id;
+      globe.ringsData([country]);
+      const featureName = countryFeatureById.get(country.id);
+      if (featureName) {
+        setHighlightedFeature(featureName);
+      }
+      globe.pointOfView({ lat: country.lat, lng: country.lng, altitude: 1.7 }, 950);
+    }
+
+    function focusCountry(country) {
+      stamps.add(country.id);
+      highlightCountry(country);
+
+      factBox.innerHTML = `
+        <div class="country-title">${country.flag} ${country.name}</div>
+        <div class="meta-row">
+          <span class="meta-pill">Capital: ${country.capital}</span>
+          <span class="meta-pill">Region Explore</span>
+        </div>
+        <div class="muted">${country.fact}</div>
+      `;
+
+      saveProgress();
+      updateStats();
+      renderStamps();
+    }
+
+    function buildQuestion() {
+      stopTour();
+      const answer = countries[Math.floor(Math.random() * countries.length)];
+      const others = shuffle(countries.filter((c) => c.id !== answer.id)).slice(0, 3);
+      const options = shuffle([answer, ...others]);
+      currentQuestion = { answer, options };
+      questionActive = true;
+
+      highlightCountry(answer);
+      promptNode.textContent = `Find the flag of ${answer.name}.`;
+      speak(`Can you find the flag of ${answer.name}?`);
+      renderOptions();
+    }
+
+    function renderOptions() {
+      if (!currentQuestion) {
+        optionsNode.replaceChildren();
+        return;
+      }
+
+      const nodes = currentQuestion.options.map((country) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "flag-card";
+        btn.innerHTML = `<div class="flag">${country.flag}</div><div class="flag-label">${country.name}</div>`;
+        btn.addEventListener("click", () => chooseOption(country, btn));
+        return btn;
+      });
+
+      optionsNode.replaceChildren(...nodes);
+    }
+
+    function chooseOption(country, node) {
+      if (!questionActive || !currentQuestion) return;
+
+      if (country.id === currentQuestion.answer.id) {
+        node.classList.add("good");
+        score += 1;
+        streak += 1;
+        promptNode.textContent = `Great! ${country.flag} is the flag of ${country.name}.`;
+        celebrate();
+        speak(`Great job. This is ${country.name}.`);
+        questionActive = false;
+        focusCountry(country);
+      } else {
+        node.classList.add("bad");
+        streak = 0;
+        tone(220, 0.11, 0);
+        tone(180, 0.15, 0.09);
+        promptNode.textContent = "Nice try. Tap Repeat Hint and listen again.";
+        saveProgress();
+        updateStats();
+      }
+    }
+
+    function repeatHint() {
+      if (!currentQuestion) {
+        promptNode.textContent = "Start a quiz first.";
+        return;
+      }
+      promptNode.textContent = `Find the flag of ${currentQuestion.answer.name}.`;
+      speak(`Look for ${currentQuestion.answer.name}.`);
+      highlightCountry(currentQuestion.answer);
+    }
+
+    function stopTour() {
+      if (worldTourTimer) {
+        clearInterval(worldTourTimer);
+        worldTourTimer = null;
+      }
+      worldTourBtn.textContent = "World Tour";
+    }
+
+    function startTour() {
+      if (worldTourTimer) {
+        stopTour();
+        return;
+      }
+
+      const route = shuffle(countries).slice(0, 8);
+      let index = 0;
+      worldTourBtn.textContent = "Stop Tour";
+
+      const step = () => {
+        if (index >= route.length) {
+          stopTour();
+          promptNode.textContent = "World Tour finished. Start Quiz for a new challenge.";
+          return;
+        }
+
+        const country = route[index];
+        focusCountry(country);
+        promptNode.textContent = `Tour stop ${index + 1}/${route.length}: ${country.name}`;
+        speak(`${country.name}. Capital city: ${country.capital}.`);
+        index += 1;
+      };
+
+      step();
+      worldTourTimer = setInterval(step, 3000);
+    }
+
+    startQuizBtn.addEventListener("click", buildQuestion);
+    replayHintBtn.addEventListener("click", repeatHint);
+    worldTourBtn.addEventListener("click", startTour);
+    window.addEventListener("resize", resizeGlobe);
+
+    updateStats();
+    renderStamps();
+    loadWorldPolygons();
+  </script>
+</body>
+</html>
