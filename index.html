@@ -4,337 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flag Explorer 3D</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sea: {
+              900: '#06213b',
+              800: '#0d3558',
+              700: '#134e6f'
+            },
+            sun: {
+              400: '#ffb252',
+              500: '#ef5b0c'
+            }
+          },
+          fontFamily: {
+            display: ['Fredoka', 'Trebuchet MS', 'sans-serif'],
+            body: ['Nunito', 'Segoe UI', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <style>
-    :root {
-      --bg-deep: #06213b;
-      --bg-mid: #134e6f;
-      --card: rgba(255, 255, 255, 0.93);
-      --text: #16324f;
-      --accent: #ef5b0c;
-      --accent-2: #119da4;
-      --ok: #2ea043;
-      --bad: #cc2936;
-      --ring: #ffd23f;
-      --shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
-      --radius: 20px;
-      --font-display: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
-      --font-body: "Nunito", "Segoe UI", sans-serif;
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      margin: 0;
-      min-height: 100dvh;
-      font-family: var(--font-body);
-      color: var(--text);
-      background:
-        radial-gradient(circle at 18% 12%, rgba(255, 210, 63, 0.25), transparent 35%),
-        radial-gradient(circle at 84% 3%, rgba(17, 157, 164, 0.27), transparent 38%),
-        linear-gradient(140deg, var(--bg-deep), var(--bg-mid));
-      padding: 12px;
-      display: flex;
-      justify-content: center;
-      overflow: auto;
-    }
-
-    .game {
-      width: 100%;
-      max-width: 1400px;
-      min-height: calc(100dvh - 24px);
-      display: grid;
-      gap: 14px;
-    }
-
-    .header,
-    .panel,
-    .quiz,
-    .facts {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .header {
-      padding: 16px 18px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-    }
-
-    h1 {
-      margin: 0;
-      font-family: var(--font-display);
-      font-size: clamp(1.6rem, 4vw, 2.5rem);
-    }
-
-    .subtitle {
-      margin: 5px 0 0;
-      font-size: clamp(1rem, 2.4vw, 1.1rem);
-      opacity: 0.88;
-    }
-
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: end;
-      gap: 8px;
-    }
-
-    .chip {
-      border-radius: 999px;
-      padding: 7px 12px;
-      border: 2px solid #dcebf7;
-      background: #fff;
-      font-weight: 800;
-      font-size: 0.93rem;
-      white-space: nowrap;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(340px, 1fr);
-      gap: 14px;
-      align-items: start;
-    }
-
-    .panel {
-      padding: 14px;
-      display: flex;
-      min-width: 0;
-    }
-
-    .globe-wrap {
-      border-radius: 16px;
-      overflow: hidden;
-      width: 100%;
-      height: clamp(360px, 68vh, 760px);
-      border: 3px solid #d9edf6;
-      background: linear-gradient(180deg, #021e3d, #003566);
-      position: relative;
-    }
-
-    #globeViz {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-    }
-
-    .side-panel { display: grid; gap: 14px; align-content: start; min-width: 0; }
-
-    .map-hint {
-      position: absolute;
-      left: 12px;
-      bottom: 10px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #e8f6ff;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-      background: rgba(0, 0, 0, 0.28);
-      border-radius: 10px;
-      padding: 5px 9px;
-      pointer-events: none;
-    }
-
-    .quiz,
-    .facts {
-      padding: 18px;
-      border: 1px solid rgba(18, 61, 93, 0.14);
-      background: rgba(255, 255, 255, 0.97);
-      box-shadow: 0 14px 26px rgba(5, 33, 58, 0.11);
-    }
-
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .panel-title {
-      margin: 0;
-      font-size: 1.12rem;
-      font-family: var(--font-display);
-      letter-spacing: 0.2px;
-      color: #112f4a;
-    }
-
-    .panel-tag {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.25px;
-      text-transform: uppercase;
-      color: #955102;
-      background: #fff3dc;
-      border: 1px solid #ffd998;
-    }
-
-    .prompt {
-      margin: 0;
-      font-size: 1.02rem;
-      font-weight: 800;
-      color: #173750;
-      line-height: 1.35;
-      border-radius: 14px;
-      padding: 12px 13px;
-      background: linear-gradient(180deg, #f5fbff, #eaf8ff);
-      border: 1px solid #d4e8f4;
-    }
-
-    .btn-row {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    button {
-      border: 1px solid transparent;
-      cursor: pointer;
-      border-radius: 14px;
-      font: inherit;
-      font-size: 0.92rem;
-      font-weight: 800;
-      padding: 11px 13px;
-      transition: transform 0.12s ease, filter 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 6px 14px rgba(13, 52, 79, 0.14);
-    }
-
-    button:active { transform: scale(0.98); }
-    button:hover {
-      filter: brightness(1.03);
-      box-shadow: 0 8px 18px rgba(13, 52, 79, 0.2);
-    }
-    button:focus-visible {
-      outline: 3px solid rgba(17, 157, 164, 0.45);
-      outline-offset: 1px;
-    }
-    .primary {
-      background: linear-gradient(180deg, #ff933f, var(--accent));
-      color: #fff;
-      border-color: rgba(195, 86, 18, 0.4);
-    }
-    .secondary {
-      background: linear-gradient(180deg, #17b7be, var(--accent-2));
-      color: #fff;
-      border-color: rgba(11, 102, 106, 0.4);
-    }
-    .ghost {
-      background: linear-gradient(180deg, #f7fdff, #ebf8fd);
-      color: #0a4f66;
-      border-color: #b8e5ea;
-    }
-
-    .options {
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(120px, 1fr));
-      gap: 9px;
-    }
-
-    .flag-card {
-      background: #ffffff;
-      border: 2px solid #d9e9f4;
-      border-radius: 12px;
-      min-height: 76px;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      justify-items: start;
-      gap: 10px;
-      padding: 10px 12px;
-      box-shadow: none;
-      text-align: left;
-    }
-
-    .flag { font-size: 2.8rem; line-height: 1; }
-    .flag-label {
-      font-size: 0.92rem;
-      color: #2f4f6b;
-      font-weight: 800;
-      line-height: 1.2;
-    }
-    .flag-card.good { border-color: var(--ok); animation: pop 260ms ease; }
-    .flag-card.bad { border-color: var(--bad); animation: shake 260ms ease 2; }
-    .flag-card:hover { transform: translateY(-1px); }
-
-    .fact-box {
-      border-radius: 15px;
-      border: 2px solid #d8e9f4;
-      background:
-        linear-gradient(180deg, #ffffff 0%, #f3faff 100%);
-      padding: 12px;
-      min-height: 126px;
-      display: grid;
-      gap: 7px;
-      align-content: start;
-      box-shadow: inset 0 -10px 18px rgba(13, 74, 115, 0.05);
-    }
-
-    .country-title {
-      font-size: 1.08rem;
-      font-weight: 900;
-      color: #12324f;
-    }
-    .muted { opacity: 0.85; font-size: 0.95rem; }
-    .meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .meta-pill {
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: #164a6b;
-      background: #e5f4ff;
-      border: 1px solid #c7e5f8;
-    }
-    .stamp-head {
-      margin-top: 2px;
-      font-size: 0.8rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.35px;
-      color: #56738c;
-    }
-
-    .stamps {
-      margin-top: 12px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
-      gap: 8px;
-    }
-
-    .stamp {
-      background: linear-gradient(180deg, #ffffff, #f7fbff);
-      border: 2px solid #d7e8f4;
-      border-radius: 11px;
-      min-height: 62px;
-      padding: 7px 5px;
-      text-align: center;
-      opacity: 0.45;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .stamp.unlocked {
-      opacity: 1;
-      border-color: var(--ring);
-      background: #fff6cf;
-      transform: translateY(-1px);
-    }
-
-    .stamp-flag { font-size: 1.32rem; line-height: 1; }
-    .stamp-label { margin-top: 3px; font-size: 0.71rem; font-weight: 700; }
-
+    #globeViz { width: 100%; height: 100%; min-height: 0; }
+    .map-hint { text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
     .fx {
       position: fixed;
       inset: 0;
@@ -342,7 +42,6 @@
       overflow: hidden;
       z-index: 40;
     }
-
     .spark {
       position: absolute;
       width: 12px;
@@ -351,7 +50,6 @@
       animation: fall 950ms linear forwards;
       top: -12px;
     }
-
     .pulse {
       position: fixed;
       left: 50%;
@@ -365,97 +63,81 @@
       pointer-events: none;
       z-index: 41;
     }
-
     .pulse.show { animation: burst 700ms ease-out forwards; }
-
-    @keyframes pop {
-      0% { transform: scale(0.9); }
-      80% { transform: scale(1.07); }
-      100% { transform: scale(1); }
+    .flag-card.good {
+      border-color: #2ea043;
+      box-shadow: 0 0 0 2px rgba(46, 160, 67, 0.18);
     }
-
+    .flag-card.bad {
+      border-color: #cc2936;
+      animation: shake 260ms ease 2;
+    }
     @keyframes shake {
       0%, 100% { transform: rotate(0deg); }
       25% { transform: rotate(-2.4deg); }
       75% { transform: rotate(2.4deg); }
     }
-
     @keyframes fall {
       0% { transform: translateY(0) rotate(0deg); opacity: 0.95; }
       100% { transform: translateY(72vh) rotate(320deg); opacity: 0; }
     }
-
     @keyframes burst {
       0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
       100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
     }
-
-    @media (max-width: 930px) {
-      .layout { grid-template-columns: 1fr; }
-      .header { grid-template-columns: 1fr; }
-      .stats { justify-content: start; }
-      .globe-wrap, #globeViz { min-height: 320px; height: 320px; }
-      .panel-head { margin-bottom: 10px; }
-    }
-
-    @media (max-width: 560px) {
-      .options { grid-template-columns: 1fr; }
-      .globe-wrap, #globeViz { min-height: 290px; height: 290px; }
-      .quiz, .facts { padding: 14px; }
-      .flag-card { min-height: 72px; padding: 9px 11px; }
-      .flag { font-size: 2.5rem; }
-    }
   </style>
   <script src="https://unpkg.com/globe.gl"></script>
 </head>
-<body>
-  <main class="game">
-    <section class="header">
-      <div>
-        <h1>Flag Explorer 3D</h1>
-        <p class="subtitle">Spin the real world map, tap countries, and match flags in a game built for kids.</p>
-      </div>
-      <div class="stats">
-        <div class="chip">Score: <span id="score">0</span></div>
-        <div class="chip">Streak: <span id="streak">0</span></div>
-        <div class="chip">Passport Stamps: <span id="stampsCount">0</span></div>
+<body class="min-h-dvh bg-[radial-gradient(circle_at_18%_12%,rgba(255,210,63,0.24),transparent_35%),radial-gradient(circle_at_84%_3%,rgba(17,157,164,0.26),transparent_38%),linear-gradient(140deg,#06213b,#134e6f)] font-body text-slate-800">
+  <main class="mx-auto w-full max-w-[1400px] p-3 md:p-4">
+    <section class="rounded-3xl border border-white/35 bg-white/95 shadow-2xl shadow-slate-900/25 backdrop-blur-sm">
+      <div class="grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center md:p-6">
+        <div>
+          <h1 class="font-display text-3xl font-bold leading-tight text-slate-900 md:text-5xl">Flag Explorer 3D</h1>
+          <p class="mt-2 max-w-2xl text-sm font-semibold text-slate-600 md:text-base">Spin the real world map, tap countries, and match flags in a game built for kids.</p>
+        </div>
+        <div class="flex flex-wrap gap-2 md:justify-end">
+          <div class="rounded-full border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-extrabold text-slate-700">Score: <span id="score" class="text-slate-900">0</span></div>
+          <div class="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-extrabold text-slate-700">Streak: <span id="streak" class="text-slate-900">0</span></div>
+          <div class="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-extrabold text-slate-700">Passport Stamps: <span id="stampsCount" class="text-slate-900">0</span></div>
+        </div>
       </div>
     </section>
 
-    <section class="layout">
-      <section class="panel">
-        <div class="globe-wrap">
+    <section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)]">
+      <section class="rounded-3xl border border-white/30 bg-white/95 p-3 shadow-2xl shadow-slate-900/20 backdrop-blur-sm md:p-4">
+        <div class="relative h-[clamp(360px,68vh,760px)] overflow-hidden rounded-2xl border-2 border-sky-100 bg-gradient-to-b from-[#021e3d] to-[#003566]">
           <div id="globeViz" aria-label="Interactive 3D world map"></div>
-          <div class="map-hint">Drag to rotate • Zoom with scroll/pinch • Tap countries to explore</div>
+          <div class="map-hint pointer-events-none absolute bottom-2 left-2 rounded-lg bg-black/35 px-2.5 py-1 text-xs font-extrabold text-sky-100 md:text-sm">Drag to rotate • Zoom with scroll/pinch • Tap countries to explore</div>
         </div>
       </section>
 
-      <section class="side-panel">
-        <section class="quiz">
-          <div class="panel-head">
-            <h2 class="panel-title">Start Quiz</h2>
-            <span class="panel-tag">Game Mode</span>
+      <section class="grid content-start gap-4">
+        <section class="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-900/10 md:p-5">
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <h2 class="font-display text-xl font-bold text-slate-900">Start Quiz</h2>
+            <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-amber-700">Game Mode</span>
           </div>
-          <p class="prompt" id="prompt">Press Start Quiz, then choose the correct flag.</p>
-          <div class="btn-row">
-            <button class="primary" id="startQuiz" type="button">Start Quiz</button>
-            <button class="secondary" id="replayHint" type="button">Repeat Hint</button>
-            <button class="ghost" id="worldTour" type="button">World Tour</button>
+          <p id="prompt" class="rounded-xl border border-sky-200 bg-sky-50/80 px-3 py-3 text-sm font-extrabold leading-relaxed text-slate-700 md:text-[15px]">Press Start Quiz, then choose the correct flag.</p>
+          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <button class="rounded-xl border border-orange-600/40 bg-gradient-to-b from-orange-400 to-sun-500 px-3 py-2.5 text-sm font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:brightness-105" id="startQuiz" type="button">Start Quiz</button>
+            <button class="rounded-xl border border-cyan-700/30 bg-gradient-to-b from-cyan-400 to-cyan-600 px-3 py-2.5 text-sm font-extrabold text-white shadow-md shadow-cyan-500/20 transition hover:brightness-105" id="replayHint" type="button">Repeat Hint</button>
+            <button class="rounded-xl border border-sky-200 bg-gradient-to-b from-sky-50 to-cyan-50 px-3 py-2.5 text-sm font-extrabold text-cyan-800 shadow-sm transition hover:bg-sky-100" id="worldTour" type="button">World Tour</button>
           </div>
-          <div class="options" id="options"></div>
+          <div id="options" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2"></div>
         </section>
 
-        <section class="facts">
-          <div class="panel-head">
-            <h2 class="panel-title">Country Explorer</h2>
-            <span class="panel-tag">Discover</span>
+        <section class="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-900/10 md:p-5">
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <h2 class="font-display text-xl font-bold text-slate-900">Country Explorer</h2>
+            <span class="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-cyan-700">Discover</span>
           </div>
-          <div class="fact-box" id="factBox">
-            <div class="country-title">Tap a country on the globe</div>
-            <div class="muted">You will see the country flag, capital city, and a fun fact.</div>
+          <div id="factBox" class="grid min-h-32 content-start gap-2 rounded-2xl border border-sky-200 bg-gradient-to-b from-white to-sky-50 p-3">
+            <div class="text-lg font-extrabold text-slate-800">Tap a country on the globe</div>
+            <div class="text-sm font-semibold text-slate-600">You will see the country flag, capital city, and a fun fact.</div>
           </div>
-          <div class="stamp-head">Passport Collection</div>
-          <div class="stamps" id="stamps"></div>
+          <div class="mt-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Passport Collection</div>
+          <div id="stamps" class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4"></div>
         </section>
       </section>
     </section>
@@ -660,8 +342,8 @@
       const nodes = stampRewards.map((reward) => {
         const unlocked = score >= reward.need;
         const card = document.createElement("div");
-        card.className = `stamp${unlocked ? " unlocked" : ""}`;
-        card.innerHTML = `<div class="stamp-flag">${reward.icon}</div><div class="stamp-label">${unlocked ? `${reward.need} pts` : `Unlock ${reward.need}`}</div>`;
+        card.className = `rounded-xl border px-2 py-2 text-center transition ${unlocked ? "border-amber-300 bg-amber-50" : "border-slate-200 bg-slate-50 opacity-50"}`;
+        card.innerHTML = `<div class="text-xl leading-none">${reward.icon}</div><div class="mt-1 text-[11px] font-extrabold text-slate-600">${unlocked ? `${reward.need} pts` : `Unlock ${reward.need}`}</div>`;
         return card;
       });
       stampsNode.replaceChildren(...nodes);
@@ -742,12 +424,12 @@
       highlightCountry(country);
 
       factBox.innerHTML = `
-        <div class="country-title">${country.flag} ${country.name}</div>
-        <div class="meta-row">
-          <span class="meta-pill">Capital: ${country.capital}</span>
-          <span class="meta-pill">Region Explore</span>
+        <div class="text-lg font-extrabold text-slate-800">${country.flag} ${country.name}</div>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="rounded-full border border-sky-200 bg-sky-100 px-2.5 py-1 text-xs font-extrabold text-sky-800">Capital: ${country.capital}</span>
+          <span class="rounded-full border border-cyan-200 bg-cyan-100 px-2.5 py-1 text-xs font-extrabold text-cyan-800">Region Explore</span>
         </div>
-        <div class="muted">${country.fact}</div>
+        <div class="text-sm font-semibold text-slate-600">${country.fact}</div>
       `;
 
       saveProgress();
@@ -778,8 +460,8 @@
       const nodes = currentQuestion.options.map((country) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "flag-card";
-        btn.innerHTML = `<div class="flag">${country.flag}</div><div class="flag-label">${country.name}</div>`;
+        btn.className = "flag-card grid min-h-[72px] grid-cols-[auto_1fr] items-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300";
+        btn.innerHTML = `<div class="text-[2.1rem] leading-none">${country.flag}</div><div class="text-sm font-extrabold text-slate-700">${country.name}</div>`;
         btn.addEventListener("click", () => chooseOption(country, btn));
         return btn;
       });
