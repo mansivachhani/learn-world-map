@@ -93,15 +93,28 @@
     <section class="rounded-3xl border border-white/35 bg-white/95 shadow-2xl shadow-slate-900/25 backdrop-blur-sm">
       <div class="grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center md:p-6">
         <div>
-          <h1 class="font-display text-3xl font-bold leading-tight text-slate-900 md:text-5xl">Flag Explorer 3D</h1>
+          <h1 class="font-display text-3xl font-semibold leading-tight text-slate-900 md:text-4xl">Flag Explorer 3D</h1>
           <p class="mt-2 max-w-2xl text-sm font-semibold text-slate-600 md:text-base">Spin the real world map, tap countries, and match flags in a game built for kids.</p>
         </div>
         <div class="flex flex-wrap gap-2 md:justify-end">
           <div class="rounded-full border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-extrabold text-slate-700">Score: <span id="score" class="text-slate-900">0</span></div>
           <div class="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-extrabold text-slate-700">Streak: <span id="streak" class="text-slate-900">0</span></div>
-          <div class="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-extrabold text-slate-700">Passport Stamps: <span id="stampsCount" class="text-slate-900">0</span></div>
         </div>
       </div>
+    </section>
+
+    <section class="mt-4 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-900/10 md:p-5">
+      <div class="mb-3 flex items-center justify-between gap-2">
+        <h2 class="font-display text-xl font-bold text-slate-900">Country Explorer</h2>
+        <span class="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-cyan-700">Discover</span>
+      </div>
+      <div id="factBox" class="grid min-h-28 content-start gap-2 rounded-2xl border border-sky-200 bg-gradient-to-b from-white to-sky-50 p-3 md:grid-cols-[1fr_auto] md:items-center">
+        <div>
+          <div class="text-lg font-extrabold text-slate-800">Tap a country on the globe</div>
+          <div class="text-sm font-semibold text-slate-600">You will see the country flag, capital city, and a fun fact.</div>
+        </div>
+      </div>
+      <div id="stamps" class="hidden"></div>
     </section>
 
     <section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)]">
@@ -125,19 +138,6 @@
             <button class="rounded-xl border border-sky-200 bg-gradient-to-b from-sky-50 to-cyan-50 px-3 py-2.5 text-sm font-extrabold text-cyan-800 shadow-sm transition hover:bg-sky-100" id="worldTour" type="button">World Tour</button>
           </div>
           <div id="options" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2"></div>
-        </section>
-
-        <section class="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xl shadow-slate-900/10 md:p-5">
-          <div class="mb-3 flex items-center justify-between gap-2">
-            <h2 class="font-display text-xl font-bold text-slate-900">Country Explorer</h2>
-            <span class="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-cyan-700">Discover</span>
-          </div>
-          <div id="factBox" class="grid min-h-32 content-start gap-2 rounded-2xl border border-sky-200 bg-gradient-to-b from-white to-sky-50 p-3">
-            <div class="text-lg font-extrabold text-slate-800">Tap a country on the globe</div>
-            <div class="text-sm font-semibold text-slate-600">You will see the country flag, capital city, and a fun fact.</div>
-          </div>
-          <div class="mt-3 text-xs font-extrabold uppercase tracking-wider text-slate-500">Passport Collection</div>
-          <div id="stamps" class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4"></div>
         </section>
       </section>
     </section>
@@ -198,6 +198,8 @@
     let worldTourTimer = null;
     const countryFeatureById = new Map();
     const countryByFeatureName = new Map();
+    const countryById = new Map(countries.map((country) => [country.id, country]));
+    const fallbackCountryByName = new Map();
     let polygonFeatures = [];
 
     const globe = Globe()(document.getElementById("globeViz"))
@@ -216,15 +218,29 @@
       .polygonStrokeColor((feature) => isHighlightedFeature(feature) ? "rgba(255, 255, 255, 1)" : "rgba(212, 242, 255, 0.58)")
       .polygonLabel((feature) => `<b>${feature.properties?.name || "Country"}</b>`)
       .onPolygonClick((feature) => {
-        const featureName = normalizeName(feature.properties?.name || "");
-        const country = countryByFeatureName.get(featureName);
+        const featureRawName = feature.properties?.name || "";
+        const featureName = normalizeName(featureRawName);
+        const mappedCountryId = featureToCountryIdByName[featureName];
+        const country = mappedCountryId ? countryById.get(mappedCountryId) : countryByFeatureName.get(featureName);
+
         if (country) {
           focusCountry(country);
-          promptNode.textContent = `You discovered ${country.name}.`;
           speak(`${country.name}. ${country.fact}`);
-        } else {
-          setHighlightedFeature(featureName);
-          promptNode.textContent = `You tapped ${feature.properties?.name || "a country"}.`;
+          return;
+        }
+
+        setHighlightedFeature(featureName);
+        const fallback = fallbackCountryByName.get(featureName);
+        if (fallback) {
+          factBox.innerHTML = `
+            <div class="text-lg font-extrabold text-slate-800">${fallback.flag || "🌍"} ${fallback.name}</div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="rounded-full border border-sky-200 bg-sky-100 px-2.5 py-1 text-xs font-extrabold text-sky-800">Capital: ${fallback.capital || "Unknown"}</span>
+              <span class="rounded-full border border-cyan-200 bg-cyan-100 px-2.5 py-1 text-xs font-extrabold text-cyan-800">World Country</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-600">Tap Start Quiz to continue learning flags.</div>
+          `;
+          speak(`${fallback.name}. Capital city: ${fallback.capital || "unknown"}.`);
         }
       })
       .polygonsTransitionDuration(220)
@@ -242,8 +258,8 @@
 
     const countryNameAliases = {
       us: ["united states of america", "usa", "united states"],
-      gb: ["united kingdom", "uk", "great britain", "britain"],
-      kr: ["south korea", "korea republic of", "republic of korea"],
+      gb: ["united kingdom", "uk", "great britain", "britain", "england", "scotland", "wales", "northern ireland"],
+      kr: ["south korea", "korea republic of", "republic of korea", "korea south"],
       nz: ["new zealand"],
       za: ["south africa"],
       cn: ["china"],
@@ -257,6 +273,13 @@
       br: ["brazil"],
       ar: ["argentina"],
       eg: ["egypt"]
+    };
+
+    const featureToCountryIdByName = {
+      england: "gb",
+      scotland: "gb",
+      wales: "gb",
+      "northern ireland": "gb"
     };
 
     function normalizeName(name) {
@@ -310,6 +333,34 @@
       });
     }
 
+    async function loadCountryMetadata() {
+      try {
+        const rows = await fetch("https://restcountries.com/v3.1/all?fields=name,capital,flag,altSpellings").then((res) => res.json());
+        rows.forEach((row) => {
+          const names = [
+            row?.name?.common,
+            row?.name?.official,
+            ...(row?.altSpellings || [])
+          ].filter(Boolean);
+
+          const metadata = {
+            name: row?.name?.common || names[0] || "Country",
+            capital: Array.isArray(row?.capital) ? row.capital[0] : row?.capital,
+            flag: row?.flag || "🌍"
+          };
+
+          names.forEach((name) => {
+            const normalized = normalizeName(name);
+            if (normalized && !fallbackCountryByName.has(normalized)) {
+              fallbackCountryByName.set(normalized, metadata);
+            }
+          });
+        });
+      } catch (error) {
+        // Keep app functional even if metadata API is unavailable.
+      }
+    }
+
     async function loadWorldPolygons() {
       try {
         const geo = await fetch("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then((res) => res.json());
@@ -335,7 +386,7 @@
     function updateStats() {
       scoreNode.textContent = score;
       streakNode.textContent = streak;
-      stampsCountNode.textContent = String(stamps.size);
+      if (stampsCountNode) stampsCountNode.textContent = String(stamps.size);
     }
 
     function renderStamps() {
@@ -346,7 +397,7 @@
         card.innerHTML = `<div class="text-xl leading-none">${reward.icon}</div><div class="mt-1 text-[11px] font-extrabold text-slate-600">${unlocked ? `${reward.need} pts` : `Unlock ${reward.need}`}</div>`;
         return card;
       });
-      stampsNode.replaceChildren(...nodes);
+      if (stampsNode) stampsNode.replaceChildren(...nodes);
     }
 
     function speak(text) {
@@ -545,6 +596,7 @@
 
     updateStats();
     renderStamps();
+    loadCountryMetadata();
     loadWorldPolygons();
   </script>
 </body>
