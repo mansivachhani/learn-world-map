@@ -96,7 +96,7 @@
           <h1 class="font-display text-3xl font-semibold leading-tight text-slate-900 md:text-4xl">World Map Adventure</h1>
           <p class="mt-2 max-w-2xl text-sm font-semibold text-[#3e5073] md:text-base">Spin the world, tap countries, and match flags in a playful learning journey for kids.</p>
         </div>
-        <div class="md:max-w-md">
+        <div id="exploredWrap" class="hidden md:max-w-md">
           <div class="rounded-2xl border border-[#d9e9ff] bg-white/90 p-2.5 shadow-sm">
             <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#4f6287]">Explored Countries</div>
             <div id="exploredFlags" class="mt-1 flex flex-wrap gap-1.5"></div>
@@ -183,6 +183,7 @@
     const factBox = document.getElementById("factBox");
     const stampsNode = document.getElementById("stamps");
     const exploredFlagsNode = document.getElementById("exploredFlags");
+    const exploredWrapNode = document.getElementById("exploredWrap");
     const startQuizBtn = document.getElementById("startQuiz");
     const replayHintBtn = document.getElementById("replayHint");
     const worldTourBtn = document.getElementById("worldTour");
@@ -385,7 +386,7 @@
     }
 
     function renderExploredFlags() {
-      if (!exploredFlagsNode) {
+      if (!exploredFlagsNode || !exploredWrapNode) {
         return;
       }
 
@@ -394,10 +395,12 @@
         .filter(Boolean);
 
       if (!explored.length) {
-        exploredFlagsNode.innerHTML = '<span class="text-xs font-semibold text-[#6b7ea1]">No countries yet</span>';
+        exploredWrapNode.classList.add("hidden");
+        exploredFlagsNode.innerHTML = "";
         return;
       }
 
+      exploredWrapNode.classList.remove("hidden");
       const chips = explored.map((country) =>
         `<span class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-sm font-extrabold text-emerald-700">${country.flag}<span class="text-[11px]">✓</span></span>`
       );
