@@ -35,49 +35,6 @@
   <style>
     #globeViz { width: 100%; height: 100%; min-height: 0; }
     .map-hint { text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
-    .welcome-art {
-      position: absolute;
-      right: 14px;
-      bottom: 10px;
-      width: 220px;
-      height: 140px;
-      pointer-events: none;
-    }
-    .float-shape {
-      position: absolute;
-      width: 38px;
-      height: 38px;
-      filter: drop-shadow(0 8px 10px rgba(40, 66, 110, 0.16));
-      animation: floaty 4.1s ease-in-out infinite;
-    }
-    .float-shape.one {
-      left: 12px;
-      top: 22px;
-      border-radius: 8px;
-      background: linear-gradient(145deg, #fca5a5, #ef4444);
-    }
-    .float-shape.two {
-      left: 74px;
-      top: 8px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #bfdbfe, #3b82f6);
-      animation-delay: 0.5s;
-    }
-    .float-shape.three {
-      left: 134px;
-      top: 40px;
-      clip-path: polygon(50% 6%, 95% 90%, 5% 90%);
-      background: linear-gradient(145deg, #fcd34d, #f59e0b);
-      animation-delay: 0.9s;
-    }
-    .hill {
-      position: absolute;
-      bottom: -30px;
-      border-radius: 50%;
-      background: linear-gradient(180deg, #8bdc95, #5eb972);
-    }
-    .hill.left { left: -34px; width: 160px; height: 88px; }
-    .hill.right { right: -28px; width: 144px; height: 82px; }
     .fx {
       position: fixed;
       inset: 0;
@@ -128,10 +85,6 @@
       0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
       100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
     }
-    @keyframes floaty {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-9px) rotate(4deg); }
-    }
   </style>
   <script src="https://unpkg.com/globe.gl"></script>
 </head>
@@ -144,19 +97,12 @@
           <h1 class="font-display text-3xl font-semibold leading-tight text-slate-900 md:text-4xl">Flag Explorer 3D</h1>
           <p class="mt-2 max-w-2xl text-sm font-semibold text-[#3e5073] md:text-base">Spin the world, tap countries, and match flags in a playful learning journey for kids.</p>
         </div>
-        <div class="md:pr-44 md:max-w-md">
+        <div class="md:max-w-md">
           <div class="rounded-2xl border border-[#d9e9ff] bg-white/90 p-2.5 shadow-sm">
             <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#4f6287]">Explored Countries</div>
             <div id="exploredFlags" class="mt-1 flex flex-wrap gap-1.5"></div>
           </div>
         </div>
-      </div>
-      <div class="welcome-art hidden md:block">
-        <div class="float-shape one"></div>
-        <div class="float-shape two"></div>
-        <div class="float-shape three"></div>
-        <div class="hill left"></div>
-        <div class="hill right"></div>
       </div>
     </section>
 
@@ -171,12 +117,12 @@
       <section class="grid content-start gap-4">
         <section class="rounded-3xl border border-[#e7eefc] bg-gradient-to-b from-white to-[#f9fcff] p-4 shadow-[0_12px_24px_rgba(37,50,74,0.1)] md:p-5">
           <div class="mb-3 flex items-center justify-between gap-2">
-            <h2 class="font-display text-xl font-bold text-slate-900">Start Quiz</h2>
+            <h2 class="font-display text-xl font-bold text-slate-900">Quiz Mode</h2>
             <span class="rounded-full border border-[#f8d094] bg-[#ffe8c8] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#855200]">Game Mode</span>
           </div>
           <p id="prompt" class="rounded-xl border border-[#dfeafe] bg-white px-3 py-3 text-sm font-extrabold leading-relaxed text-[#3e5073] md:text-[15px]">Press Start Quiz, then choose the correct flag.</p>
           <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <button class="rounded-xl border border-orange-600/40 bg-gradient-to-b from-orange-400 to-sun-500 px-3 py-2.5 text-sm font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:brightness-105" id="startQuiz" type="button">Start Quiz</button>
+            <button class="rounded-xl border border-orange-600/40 bg-gradient-to-b from-orange-400 to-sun-500 px-3 py-2.5 text-sm font-extrabold text-white shadow-md shadow-orange-500/20 transition hover:brightness-105" id="startQuiz" type="button">Quiz Mode</button>
             <button class="rounded-xl border border-cyan-700/30 bg-gradient-to-b from-cyan-400 to-cyan-600 px-3 py-2.5 text-sm font-extrabold text-white shadow-md shadow-cyan-500/20 transition hover:brightness-105" id="replayHint" type="button">Repeat Hint</button>
             <button class="rounded-xl border border-sky-200 bg-gradient-to-b from-sky-50 to-cyan-50 px-3 py-2.5 text-sm font-extrabold text-cyan-800 shadow-sm transition hover:bg-sky-100" id="worldTour" type="button">World Tour</button>
           </div>
