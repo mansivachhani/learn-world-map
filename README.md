@@ -2,6 +2,10 @@
 
 An interactive, kid-friendly web app to learn countries, flags, and capitals using a 3D globe game experience.
 
+## Live Demo
+
+- [learn-world-map.vercel.app](https://learn-world-map.vercel.app/)
+
 ## Features
 
 - Interactive 3D globe with real country polygons
@@ -28,10 +32,6 @@ An interactive, kid-friendly web app to learn countries, flags, and capitals usi
 cd /Users/denishvachhani/Projects/LetsBuild/learn-world-map
 python3 -m http.server 8000
 ```
-
-Open in browser:
-
-- [http://localhost:8000](http://localhost:8000)
 
 ## Project Structure
 
