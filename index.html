@@ -557,8 +557,8 @@
       const nodes = currentQuestion.options.map((country) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "flag-card grid min-h-[72px] grid-cols-[auto_1fr] items-center gap-2 rounded-xl border-2 border-[#dfeafe] bg-white px-3 py-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#f8d094]";
-        btn.innerHTML = `<div class="text-[2.1rem] leading-none">${country.flag}</div><div class="text-sm font-extrabold text-[#31517a]">${country.name}</div>`;
+        btn.className = "flag-card flex min-h-[76px] items-center justify-center rounded-xl border-2 border-[#dfeafe] bg-white px-3 py-2 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-[#f8d094]";
+        btn.innerHTML = `<div class="text-[2.3rem] leading-none">${country.flag}</div>`;
         btn.addEventListener("click", () => chooseOption(country, btn));
         return btn;
       });
