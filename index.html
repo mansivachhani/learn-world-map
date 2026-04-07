@@ -85,28 +85,84 @@
       0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
       100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
     }
+
+    body.dark-mode {
+      background: radial-gradient(circle at 15% 8%, rgba(59,130,246,0.24) 2%, transparent 36%),
+        radial-gradient(circle at 88% 2%, rgba(6,182,212,0.22) 2%, transparent 36%),
+        linear-gradient(150deg, #0b1220, #12263f);
+      color: #e5e7eb;
+    }
+    body.dark-mode #heroCard,
+    body.dark-mode #mapCard,
+    body.dark-mode #quizCard,
+    body.dark-mode #explorerCard {
+      background: linear-gradient(180deg, #111b2e, #0f1729) !important;
+      border-color: #334155 !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+    }
+    body.dark-mode #heroCard h1,
+    body.dark-mode #heroCard p,
+    body.dark-mode #quizCard h2,
+    body.dark-mode #explorerCard h2,
+    body.dark-mode #explorerWrapLabel {
+      color: #e5ecff !important;
+    }
+    body.dark-mode #prompt,
+    body.dark-mode #factBox {
+      background: #0f1b2d !important;
+      border-color: #334155 !important;
+      color: #dbeafe !important;
+    }
+    body.dark-mode .map-hint {
+      background: rgba(2, 6, 23, 0.66) !important;
+    }
+    body.dark-mode .flag-card {
+      background: #0f172a !important;
+      border-color: #334155 !important;
+      color: #e2e8f0 !important;
+    }
+    body.dark-mode #exploredWrap > div {
+      background: #0f1b2d !important;
+      border-color: #334155 !important;
+    }
+    body.dark-mode #exploredWrap .text-\[11px\] {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode #explorerCard .text-sm,
+    body.dark-mode #explorerCard .text-lg,
+    body.dark-mode #quizCard .text-sm {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode .theme-toggle {
+      background: #0f1b2d !important;
+      color: #e2e8f0 !important;
+      border-color: #334155 !important;
+    }
   </style>
   <script src="https://unpkg.com/globe.gl"></script>
 </head>
 <body class="min-h-dvh bg-[radial-gradient(circle_at_15%_8%,#ffe4bf_2%,transparent_36%),radial-gradient(circle_at_88%_2%,#d6edff_2%,transparent_36%),linear-gradient(150deg,#fff4dd,#dff1ff)] font-body text-slate-800">
   <main class="mx-auto w-full max-w-[1400px] p-3 md:p-4">
-    <section class="relative overflow-hidden rounded-3xl border border-[#e7eefc] bg-gradient-to-br from-[#fff9ef] to-[#eef7ff] shadow-[0_14px_30px_rgba(37,50,74,0.12)]">
+    <section id="heroCard" class="relative overflow-hidden rounded-3xl border border-[#e7eefc] bg-gradient-to-br from-[#fff9ef] to-[#eef7ff] shadow-[0_14px_30px_rgba(37,50,74,0.12)]">
       <div class="grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center md:p-6">
         <div>
           <h1 class="font-display text-3xl font-semibold leading-tight text-slate-900 md:text-4xl">World Map Adventure</h1>
           <p class="mt-2 max-w-2xl text-sm font-semibold text-[#3e5073] md:text-base">Spin the world, tap countries, and match flags in a playful learning journey for kids.</p>
         </div>
-        <div id="exploredWrap" class="hidden md:max-w-md">
-          <div class="rounded-2xl border border-[#d9e9ff] bg-white/90 p-2.5 shadow-sm">
-            <div class="text-[11px] font-extrabold uppercase tracking-wider text-[#4f6287]">Explored Countries</div>
-            <div id="exploredFlags" class="mt-1 flex flex-wrap gap-1.5"></div>
+        <div class="md:max-w-md space-y-2">
+          <button id="themeToggle" type="button" class="theme-toggle w-full rounded-xl border border-[#d9e9ff] bg-white/90 px-3 py-2 text-sm font-extrabold text-[#31517a] shadow-sm transition hover:brightness-95">Dark Mode</button>
+          <div id="exploredWrap" class="hidden">
+            <div class="rounded-2xl border border-[#d9e9ff] bg-white/90 p-2.5 shadow-sm">
+              <div id="explorerWrapLabel" class="text-[11px] font-extrabold uppercase tracking-wider text-[#4f6287]">Explored Countries</div>
+              <div id="exploredFlags" class="mt-1 flex flex-wrap gap-1.5"></div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <section class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,1fr)]">
-      <section class="rounded-3xl border border-[#e7eefc] bg-white/90 p-3 shadow-[0_12px_30px_rgba(37,50,74,0.12)] md:p-4">
+      <section id="mapCard" class="rounded-3xl border border-[#e7eefc] bg-white/90 p-3 shadow-[0_12px_30px_rgba(37,50,74,0.12)] md:p-4">
         <div class="relative h-[clamp(360px,68vh,760px)] overflow-hidden rounded-2xl border-2 border-sky-100 bg-gradient-to-b from-[#021e3d] to-[#003566]">
           <div id="globeViz" aria-label="Interactive 3D world map"></div>
           <div class="map-hint pointer-events-none absolute bottom-2 left-2 rounded-lg bg-black/35 px-2.5 py-1 text-xs font-extrabold text-sky-100 md:text-sm">Drag to rotate • Zoom with scroll/pinch • Tap countries to explore</div>
@@ -114,7 +170,7 @@
       </section>
 
       <section class="grid content-start gap-4">
-        <section class="rounded-3xl border border-[#e7eefc] bg-gradient-to-b from-white to-[#f9fcff] p-4 shadow-[0_12px_24px_rgba(37,50,74,0.1)] md:p-5">
+        <section id="quizCard" class="rounded-3xl border border-[#e7eefc] bg-gradient-to-b from-white to-[#f9fcff] p-4 shadow-[0_12px_24px_rgba(37,50,74,0.1)] md:p-5">
           <div class="mb-3 flex items-center justify-between gap-2">
             <h2 class="font-display text-xl font-bold text-slate-900">Quiz Mode</h2>
             <span class="rounded-full border border-[#f8d094] bg-[#ffe8c8] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#855200]">Game Mode</span>
@@ -129,7 +185,7 @@
         </section>
 
 
-        <section class="rounded-3xl border border-[#e7eefc] bg-gradient-to-b from-white to-[#f9fcff] p-4 shadow-[0_12px_24px_rgba(37,50,74,0.1)] md:p-5">
+        <section id="explorerCard" class="rounded-3xl border border-[#e7eefc] bg-gradient-to-b from-white to-[#f9fcff] p-4 shadow-[0_12px_24px_rgba(37,50,74,0.1)] md:p-5">
           <div class="mb-3 flex items-center justify-between gap-2">
             <h2 class="font-display text-xl font-bold text-slate-900">Country Explorer</h2>
             <span class="rounded-full border border-[#dfeafe] bg-[#f6fbff] px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#31517a]">Discover</span>
@@ -196,6 +252,7 @@
     const stampsNode = document.getElementById("stamps");
     const exploredFlagsNode = document.getElementById("exploredFlags");
     const exploredWrapNode = document.getElementById("exploredWrap");
+    const themeToggleBtn = document.getElementById("themeToggle");
     const startQuizBtn = document.getElementById("startQuiz");
     const replayHintBtn = document.getElementById("replayHint");
     const worldTourBtn = document.getElementById("worldTour");
@@ -431,6 +488,21 @@
       exploredFlagsNode.innerHTML = chips.join("");
     }
 
+    function applyTheme(theme, persist = true) {
+      const useDark = theme === "dark";
+      document.body.classList.toggle("dark-mode", useDark);
+      if (themeToggleBtn) {
+        themeToggleBtn.textContent = useDark ? "Light Mode" : "Dark Mode";
+      }
+      if (persist) {
+        localStorage.setItem("worldMapTheme", useDark ? "dark" : "light");
+      }
+    }
+
+    function toggleTheme() {
+      applyTheme(document.body.classList.contains("dark-mode") ? "light" : "dark");
+    }
+
     function updateStats() {
       renderExploredFlags();
     }
@@ -638,8 +710,10 @@
     startQuizBtn.addEventListener("click", buildQuestion);
     replayHintBtn.addEventListener("click", repeatHint);
     worldTourBtn.addEventListener("click", startTour);
+    if (themeToggleBtn) themeToggleBtn.addEventListener("click", toggleTheme);
     window.addEventListener("resize", resizeGlobe);
 
+    applyTheme(localStorage.getItem("worldMapTheme") === "dark" ? "dark" : "light", false);
     updateStats();
     renderStamps();
     loadCountryMetadata();
